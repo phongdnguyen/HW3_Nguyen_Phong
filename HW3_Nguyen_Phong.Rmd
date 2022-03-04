@@ -1,0 +1,54 @@
+---
+title: "Mapping"
+author: "Phong D. Nguyen"
+date: "3/3/2022"
+output: html_document
+knit: (function(inputFile, encoding) {
+  outDir <- 'docs';
+  rmarkdown::render(inputFile, 
+                    encoding=encoding,
+                    output_file=file.path(dirname(inputFile), outDir, 'index.html'))})
+---
+
+<hr/>
+
+```{r setup, include=FALSE}
+library(knitr)
+library(tidyverse)
+library(plotly)
+library(ggmap)
+#set chunk and figure default options
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, tidy = TRUE)
+```
+
+The data set is from kaggle.com and catalogs fast food restaurants in Colorado. The plot simple displays fast food restaurant locations.
+
+```{r}
+#Fast food restaurants in CO
+restaurants <- read_csv("data/FastFoodRestaurants.csv")
+restaurants <- restaurants %>% filter(province == "CO")
+restaurants$name <- restaurants$name %>% factor()
+#Retrieve CO map data
+bbox <- c(-109.060253,36.992426,-102.041524,41.003444)
+co <- ggmap(get_map(location = bbox, zoom = 10, maptype = "roadmap", source = "osm"))
+
+plot <- co +
+  geom_point(data = restaurants, 
+             aes(x = longitude, 
+                 y = latitude, 
+                 color = name, 
+                 address = address,
+                 city = city,
+                 web = websites), alpha = 0.55, size = 3) + 
+  labs(x = "", y = "") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+ggplotly(plot, tooltip = c("colour", "address", "city")) 
+```
+<hr/>
+
+## Appendix
+
+```{r show-code, ref.label = all_labels(), echo = TRUE, eval = FALSE}
+```
